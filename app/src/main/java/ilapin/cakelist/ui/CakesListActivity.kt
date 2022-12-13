@@ -3,6 +3,7 @@ package ilapin.cakelist.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -23,12 +26,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import dagger.hilt.android.AndroidEntryPoint
+import ilapin.cakelist.R
 import ilapin.cakelist.domain.Cake
 import ilapin.cakelist.ui.theme.CakeListTheme
 import javax.inject.Inject
@@ -46,7 +51,11 @@ class CakesListActivity : AppCompatActivity() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 CakeListTheme {
-                    CakeListScreen(viewModel.state)
+                    CakeListScreen(
+                        state = viewModel.state,
+                        onPopUpDescriptionDismissRequested = { viewModel.onPopUpDescriptionDismissRequested() },
+                        onCakeClick = { cake -> viewModel.onCakeClicked(cake) }
+                    )
                 }
             }
         })
@@ -56,17 +65,34 @@ class CakesListActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun CakeListScreen(state: CakeListViewModel.State) {
+private fun CakeListScreen(
+    state: CakeListViewModel.State,
+    onPopUpDescriptionDismissRequested: () -> Unit,
+    onCakeClick: (Cake) -> Unit
+) {
     when {
         state.isLoading -> LoadingState()
         state.isError -> {}
-        else -> CakesState(state.cakes)
+        else -> CakesState(cakes = state.cakes, onCakeClick = onCakeClick)
+    }
+
+    if (state.popUpDescription != null) {
+        AlertDialog(
+            onDismissRequest = onPopUpDescriptionDismissRequested,
+            title = { Text(stringResource(R.string.popup_title)) },
+            text = { Text(state.popUpDescription) },
+            confirmButton = {
+                Button(onClick = onPopUpDescriptionDismissRequested) {
+                    Text(stringResource(R.string.general_ok))
+                }
+            }
+        )
     }
 }
 
 @Composable
-private fun Cake(cake: Cake) {
-    Column {
+private fun Cake(cake: Cake, onClick: () -> Unit) {
+    Column(modifier = Modifier.clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = rememberAsyncImagePainter(
@@ -86,9 +112,9 @@ private fun Cake(cake: Cake) {
 }
 
 @Composable
-private fun CakesState(cakes: List<Cake>) {
+private fun CakesState(cakes: List<Cake>, onCakeClick: (Cake) -> Unit) {
     LazyColumn {
-        items(cakes) { cake -> Cake(cake) }
+        items(cakes) { cake -> Cake(cake) { onCakeClick(cake) } }
     }
 }
 
@@ -127,7 +153,25 @@ private fun CakeListScreenCakesPreview() {
             imageUrl = ""
         )
     )
-    CakeListScreen(CakeListViewModel.State(cakes = cakes))
+    CakeListScreen(
+        state = CakeListViewModel.State(cakes = cakes),
+        onPopUpDescriptionDismissRequested = {},
+        onCakeClick = {}
+    )
+}
+
+@Composable
+@Preview(
+    apiLevel = 33,
+    showSystemUi = true,
+    device = Devices.PIXEL_4
+)
+private fun CakeListScreenPopUpPreview() {
+    CakeListScreen(
+        state = CakeListViewModel.State(isLoading = true, popUpDescription = "A cheesecake made of lemon"),
+        onPopUpDescriptionDismissRequested = {},
+        onCakeClick = {}
+    )
 }
 
 @Composable
@@ -137,5 +181,9 @@ private fun CakeListScreenCakesPreview() {
     device = Devices.PIXEL_4
 )
 private fun CakeListScreenLoadingPreview() {
-    CakeListScreen(CakeListViewModel.State(isLoading = true))
+    CakeListScreen(
+        state = CakeListViewModel.State(isLoading = true),
+        onPopUpDescriptionDismissRequested = {},
+        onCakeClick = {}
+    )
 }

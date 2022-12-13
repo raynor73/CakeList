@@ -45,7 +45,16 @@ class CakeListViewModel @Inject constructor(
             }
     }
 
+    fun onCakeClicked(cake: Cake) {
+        state = state.copy(popUpDescription = cake.description)
+    }
+
+    fun onPopUpDescriptionDismissRequested() {
+        state = state.copy(popUpDescription = null)
+    }
+
     data class State(
+        val popUpDescription: String? = null,
         val isLoading: Boolean = false,
         val isError: Boolean = false,
         val cakes: List<Cake> = emptyList()
