@@ -32,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dagger.hilt.android.AndroidEntryPoint
 import ilapin.cakelist.R
 import ilapin.cakelist.domain.Cake
@@ -54,7 +56,8 @@ class CakesListActivity : AppCompatActivity() {
                     CakeListScreen(
                         state = viewModel.state,
                         onPopUpDescriptionDismissRequested = { viewModel.onPopUpDescriptionDismissRequested() },
-                        onCakeClick = { cake -> viewModel.onCakeClicked(cake) }
+                        onCakeClick = { cake -> viewModel.onCakeClicked(cake) },
+                        onRefresh = { viewModel.onRefresh() }
                     )
                 }
             }
@@ -68,12 +71,13 @@ class CakesListActivity : AppCompatActivity() {
 private fun CakeListScreen(
     state: CakeListViewModel.State,
     onPopUpDescriptionDismissRequested: () -> Unit,
-    onCakeClick: (Cake) -> Unit
+    onCakeClick: (Cake) -> Unit,
+    onRefresh: () -> Unit
 ) {
     when {
         state.isLoading -> LoadingState()
         state.isError -> {}
-        else -> CakesState(cakes = state.cakes, onCakeClick = onCakeClick)
+        else -> CakesState(state = state, onCakeClick = onCakeClick, onRefresh = onRefresh)
     }
 
     if (state.popUpDescription != null) {
@@ -112,9 +116,18 @@ private fun Cake(cake: Cake, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CakesState(cakes: List<Cake>, onCakeClick: (Cake) -> Unit) {
-    LazyColumn {
-        items(cakes) { cake -> Cake(cake) { onCakeClick(cake) } }
+private fun CakesState(
+    state: CakeListViewModel.State,
+    onCakeClick: (Cake) -> Unit,
+    onRefresh: () -> Unit
+) {
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = state.isRefreshing),
+        onRefresh = onRefresh
+    ) {
+        LazyColumn {
+            this.items(state.cakes) { cake -> Cake(cake) { onCakeClick(cake) } }
+        }
     }
 }
 
@@ -156,7 +169,8 @@ private fun CakeListScreenCakesPreview() {
     CakeListScreen(
         state = CakeListViewModel.State(cakes = cakes),
         onPopUpDescriptionDismissRequested = {},
-        onCakeClick = {}
+        onCakeClick = {},
+        onRefresh = {}
     )
 }
 
@@ -168,9 +182,13 @@ private fun CakeListScreenCakesPreview() {
 )
 private fun CakeListScreenPopUpPreview() {
     CakeListScreen(
-        state = CakeListViewModel.State(isLoading = true, popUpDescription = "A cheesecake made of lemon"),
+        state = CakeListViewModel.State(
+            popUpDescription = "A cheesecake made of lemon",
+            isLoading = true,
+        ),
         onPopUpDescriptionDismissRequested = {},
-        onCakeClick = {}
+        onCakeClick = {},
+        onRefresh = {}
     )
 }
 
@@ -184,6 +202,7 @@ private fun CakeListScreenLoadingPreview() {
     CakeListScreen(
         state = CakeListViewModel.State(isLoading = true),
         onPopUpDescriptionDismissRequested = {},
-        onCakeClick = {}
+        onCakeClick = {},
+        onRefresh = {}
     )
 }

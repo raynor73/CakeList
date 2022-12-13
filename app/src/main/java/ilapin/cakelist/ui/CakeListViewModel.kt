@@ -20,29 +20,13 @@ class CakeListViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
 
-        loadCakes()
-    }
-
-    fun loadCakes() {
         if (state.isLoading) {
             return
         }
 
         state = state.copy(isLoading = true)
 
-        cakesRepository
-            .getCakesList()
-            .subscribe { cakes, error: Throwable? ->
-                state = if (error == null) {
-                    state.copy(
-                        isLoading = false,
-                        isError = false,
-                        cakes = cakes
-                    )
-                } else {
-                    state.copy(isError = true)
-                }
-            }
+        loadCakes()
     }
 
     fun onCakeClicked(cake: Cake) {
@@ -53,10 +37,42 @@ class CakeListViewModel @Inject constructor(
         state = state.copy(popUpDescription = null)
     }
 
+    fun onRefresh() {
+        if (state.isRefreshing) {
+            return
+        }
+
+        state = state.copy(isRefreshing = true)
+
+        loadCakes()
+    }
+
+    private fun loadCakes() {
+        cakesRepository
+            .getCakesList()
+            .subscribe { cakes, error: Throwable? ->
+                state = if (error == null) {
+                    state.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        isError = false,
+                        cakes = cakes
+                    )
+                } else {
+                    state.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        isError = true,
+                    )
+                }
+            }
+    }
+
     data class State(
         val popUpDescription: String? = null,
         val isLoading: Boolean = false,
         val isError: Boolean = false,
+        val isRefreshing: Boolean = false,
         val cakes: List<Cake> = emptyList()
     )
 }
