@@ -10,8 +10,6 @@ class DefaultCakesRepository @Inject constructor(
 ) : CakesRepository {
 
     override fun getCakesList(): Single<List<Cake>> {
-        return cakesDataSource
-            .getCakesList()
-            .map { cakes -> cakes.distinct().sortedBy { it.title } }
+        return cakesDataSource.getCakesList()
     }
 }

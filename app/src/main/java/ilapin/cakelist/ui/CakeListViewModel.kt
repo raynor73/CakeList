@@ -58,6 +58,7 @@ class CakeListViewModel @Inject constructor(
     private fun loadCakes() {
         cakesRepository
             .getCakesList()
+            .map { cakes -> cakes.distinct().sortedBy { it.title } }
             .subscribe { cakes, error: Throwable? ->
                 state = if (error == null) {
                     state.copy(
