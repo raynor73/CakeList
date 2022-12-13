@@ -97,7 +97,7 @@ private fun CakeListScreen(
 }
 
 @Composable
-private fun Cake(cake: Cake, onClick: () -> Unit) {
+private fun CakeListItem(cake: Cake, onClick: () -> Unit) {
     Column(modifier = Modifier.clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -128,7 +128,7 @@ private fun CakesState(
         onRefresh = onRefresh
     ) {
         LazyColumn {
-            this.items(state.cakes) { cake -> Cake(cake) { onCakeClick(cake) } }
+            this.items(state.cakes) { cake -> CakeListItem(cake) { onCakeClick(cake) } }
         }
     }
 }
