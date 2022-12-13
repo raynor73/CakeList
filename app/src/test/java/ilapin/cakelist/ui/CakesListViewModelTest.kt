@@ -15,7 +15,7 @@ class CakesListViewModelTest {
 
     private val cakesRepository: CakesRepository = mock()
 
-    private val sut = CakeListViewModel(cakesRepository)
+    private val sut = CakesListViewModel(cakesRepository)
 
     @Test
     fun onCreate_ifThereIsNothingBeingLoaded_requestCakesFromRepository() {
