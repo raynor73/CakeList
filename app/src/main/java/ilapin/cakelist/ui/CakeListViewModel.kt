@@ -20,13 +20,7 @@ class CakeListViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
 
-        if (state.isLoading) {
-            return
-        }
-
-        state = state.copy(isLoading = true)
-
-        loadCakes()
+        loadIfIdle()
     }
 
     fun onCakeClicked(cake: Cake) {
@@ -43,6 +37,20 @@ class CakeListViewModel @Inject constructor(
         }
 
         state = state.copy(isRefreshing = true)
+
+        loadCakes()
+    }
+
+    fun onRetryClicked() {
+        loadIfIdle()
+    }
+
+    private fun loadIfIdle() {
+        if (state.isLoading) {
+            return
+        }
+
+        state = state.copy(isLoading = true)
 
         loadCakes()
     }

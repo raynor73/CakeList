@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Cake List</string>
     <string name="general_ok">OK</string>
+    <string name="general_retry">Retry</string>
     <string name="popup_title">Description</string>
+    <string name="general_error">Oops! Something went wrong.</string>
 </resources>

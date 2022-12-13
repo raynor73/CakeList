@@ -57,7 +57,8 @@ class CakesListActivity : AppCompatActivity() {
                         state = viewModel.state,
                         onPopUpDescriptionDismissRequested = { viewModel.onPopUpDescriptionDismissRequested() },
                         onCakeClick = { cake -> viewModel.onCakeClicked(cake) },
-                        onRefresh = { viewModel.onRefresh() }
+                        onRefresh = { viewModel.onRefresh() },
+                        onRetryClick = { viewModel.onRetryClicked() }
                     )
                 }
             }
@@ -72,11 +73,12 @@ private fun CakeListScreen(
     state: CakeListViewModel.State,
     onPopUpDescriptionDismissRequested: () -> Unit,
     onCakeClick: (Cake) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onRetryClick: () -> Unit
 ) {
     when {
         state.isLoading -> LoadingState()
-        state.isError -> {}
+        state.isError -> ErrorState(onRetryClick)
         else -> CakesState(state = state, onCakeClick = onCakeClick, onRefresh = onRefresh)
     }
 
@@ -143,6 +145,38 @@ private fun LoadingState() {
 }
 
 @Composable
+private fun ErrorState(onRetryClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.general_error))
+            Button(onClick = onRetryClick) {
+                Text(stringResource(R.string.general_retry))
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(
+    apiLevel = 33,
+    showSystemUi = true,
+    device = Devices.PIXEL_4
+)
+private fun CakeListScreenErrorPreview() {
+    CakeListScreen(
+        state = CakeListViewModel.State(isError = true),
+        onPopUpDescriptionDismissRequested = {},
+        onCakeClick = {},
+        onRefresh = {},
+        onRetryClick = {}
+    )
+}
+
+@Composable
 @Preview(
     apiLevel = 33,
     showSystemUi = true,
@@ -170,7 +204,8 @@ private fun CakeListScreenCakesPreview() {
         state = CakeListViewModel.State(cakes = cakes),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
-        onRefresh = {}
+        onRefresh = {},
+        onRetryClick = {}
     )
 }
 
@@ -188,7 +223,8 @@ private fun CakeListScreenPopUpPreview() {
         ),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
-        onRefresh = {}
+        onRefresh = {},
+        onRetryClick = {}
     )
 }
 
@@ -203,6 +239,7 @@ private fun CakeListScreenLoadingPreview() {
         state = CakeListViewModel.State(isLoading = true),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
-        onRefresh = {}
+        onRefresh = {},
+        onRetryClick = {}
     )
 }
