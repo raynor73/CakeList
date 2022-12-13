@@ -6,11 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ilapin.cakelist.domain.Cake
 import ilapin.cakelist.domain.CakesRepository
 import javax.inject.Inject
 
-class CakeListViewModel @Inject constructor(
+@HiltViewModel
+class CakesListViewModel @Inject constructor(
     private val cakesRepository: CakesRepository
 ) : ViewModel(), DefaultLifecycleObserver {
 
@@ -20,7 +22,9 @@ class CakeListViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
 
-        loadIfIdle()
+        if (state.cakes.isEmpty()) {
+            loadIfIdle()
+        }
     }
 
     fun onCakeClicked(cake: Cake) {

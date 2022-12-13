@@ -1,6 +1,7 @@
 package ilapin.cakelist.ui
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,13 +39,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import ilapin.cakelist.R
 import ilapin.cakelist.domain.Cake
 import ilapin.cakelist.ui.theme.CakeListTheme
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class CakesListActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var viewModel: CakeListViewModel
+    private val viewModel: CakesListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +69,7 @@ class CakesListActivity : AppCompatActivity() {
 
 @Composable
 private fun CakeListScreen(
-    state: CakeListViewModel.State,
+    state: CakesListViewModel.State,
     onPopUpDescriptionDismissRequested: () -> Unit,
     onCakeClick: (Cake) -> Unit,
     onRefresh: () -> Unit,
@@ -119,7 +118,7 @@ private fun CakeListItem(cake: Cake, onClick: () -> Unit) {
 
 @Composable
 private fun CakesState(
-    state: CakeListViewModel.State,
+    state: CakesListViewModel.State,
     onCakeClick: (Cake) -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -168,7 +167,7 @@ private fun ErrorState(onRetryClick: () -> Unit) {
 )
 private fun CakeListScreenErrorPreview() {
     CakeListScreen(
-        state = CakeListViewModel.State(isError = true),
+        state = CakesListViewModel.State(isError = true),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
         onRefresh = {},
@@ -201,7 +200,7 @@ private fun CakeListScreenCakesPreview() {
         )
     )
     CakeListScreen(
-        state = CakeListViewModel.State(cakes = cakes),
+        state = CakesListViewModel.State(cakes = cakes),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
         onRefresh = {},
@@ -217,7 +216,7 @@ private fun CakeListScreenCakesPreview() {
 )
 private fun CakeListScreenPopUpPreview() {
     CakeListScreen(
-        state = CakeListViewModel.State(
+        state = CakesListViewModel.State(
             popUpDescription = "A cheesecake made of lemon",
             isLoading = true,
         ),
@@ -236,7 +235,7 @@ private fun CakeListScreenPopUpPreview() {
 )
 private fun CakeListScreenLoadingPreview() {
     CakeListScreen(
-        state = CakeListViewModel.State(isLoading = true),
+        state = CakesListViewModel.State(isLoading = true),
         onPopUpDescriptionDismissRequested = {},
         onCakeClick = {},
         onRefresh = {},
